@@ -1,0 +1,79 @@
+{
+  "name": "sub-store-cloudflare",
+  "version": "0.1.1",
+  "description": "Cloudflare-native subscription aggregation and routing template manager powered by Workers, Static Assets, D1, and Worker Secrets.",
+  "homepage": "https://github.com/realchendahuang/sub-store-cloudflare#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/realchendahuang/sub-store-cloudflare.git"
+  },
+  "bugs": {
+    "url": "https://github.com/realchendahuang/sub-store-cloudflare/issues"
+  },
+  "license": "AGPL-3.0-or-later",
+  "keywords": [
+    "sub-store",
+    "cloudflare",
+    "workers",
+    "d1",
+    "mihomo",
+    "sing-box",
+    "subscription",
+    "proxy"
+  ],
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "setup": "pnpm --dir frontend install && pnpm --dir cloudflare install",
+    "dev": "pnpm --dir cloudflare run dev",
+    "build": "pnpm run setup && pnpm run build:frontend",
+    "build:frontend": "VITE_API_URL=/ pnpm --dir frontend run build",
+    "install:cloudflare": "node scripts/install-cloudflare.mjs",
+    "install:doctor": "node scripts/install-cloudflare.mjs --doctor",
+    "deploy:config": "node scripts/render-wrangler-config.mjs",
+    "check:worker": "pnpm --dir cloudflare run check",
+    "check:frontend": "pnpm --dir frontend run check:locales && pnpm run build:frontend",
+    "check": "pnpm run check:worker && pnpm run check:frontend",
+    "check:deploy-config": "node scripts/check-deploy-config.mjs",
+    "deploy": "pnpm run db:migrations:apply && pnpm --dir cloudflare exec wrangler deploy --config ../wrangler.jsonc",
+    "deploy:dry-run": "pnpm run build:frontend && pnpm --dir cloudflare exec wrangler deploy --dry-run --config ../wrangler.jsonc",
+    "deploy:local": "pnpm run build:frontend && pnpm run check:deploy-config -- --required && pnpm --dir cloudflare exec wrangler deploy --config wrangler.deploy.local.jsonc",
+    "deploy:local:dry-run": "pnpm run check && pnpm run check:deploy-config -- --required && pnpm --dir cloudflare exec wrangler deploy --dry-run --config wrangler.deploy.local.jsonc",
+    "db:migrations:apply": "pnpm --dir cloudflare exec wrangler d1 migrations apply DB --remote --config ../wrangler.jsonc",
+    "seed:validate": "node scripts/validate-agent-setup.mjs",
+    "seed:render": "node scripts/render-seed-sql.mjs",
+    "migrate:remote": "pnpm --dir cloudflare exec wrangler d1 migrations apply DB --remote --config wrangler.deploy.local.jsonc",
+    "migrate:local": "pnpm --dir cloudflare exec wrangler d1 migrations apply DB --local --config wrangler.deploy.local.jsonc",
+    "seed:local": "pnpm run seed:render && pnpm --dir cloudflare exec wrangler d1 execute DB --local --config wrangler.deploy.local.jsonc --file ../cloudflare/agent.seed.local.sql",
+    "seed:remote": "pnpm run seed:render && pnpm --dir cloudflare exec wrangler d1 execute DB --remote --config wrangler.deploy.local.jsonc --file ../cloudflare/agent.seed.local.sql",
+    "check:agent": "pnpm run seed:validate -- config/agent-setup.example.json && node scripts/render-seed-sql.mjs config/agent-setup.example.json /tmp/sub-store-agent-seed-test.sql && node scripts/render-wrangler-config.mjs config/agent-setup.example.json /tmp/wrangler.deploy.test.jsonc --database-id 00000000-0000-0000-0000-000000000000 && pnpm run check:deploy-config -- /tmp/wrangler.deploy.test.jsonc",
+    "check:module-format": "node scripts/check-module-format.mjs",
+    "check:worker-contract": "node scripts/check-worker-contract.mjs",
+    "check:docs": "node scripts/check-doc-links.mjs",
+    "check:open-source": "node scripts/check-open-source.mjs",
+    "check:history": "node scripts/check-git-history.mjs",
+    "release:prepare": "node scripts/prepare-release.mjs",
+    "check:release": "pnpm run check && pnpm run check:agent && pnpm run check:module-format && pnpm run check:worker-contract && pnpm run check:docs && pnpm run check:deploy-config && pnpm run check:deploy-config -- wrangler.jsonc && pnpm run check:open-source && pnpm run check:history -- main"
+  },
+  "cloudflare": {
+    "bindings": {
+      "DB": {
+        "description": "D1 database for sources, collections, templates, settings, and app configuration. The Deploy to Cloudflare flow can create this automatically."
+      },
+      "SUB_STORE_ADMIN_TOKEN": {
+        "description": "Long random token for the admin UI and `/api/*`. Generate one with `openssl rand -base64 32`."
+      },
+      "SUB_STORE_PUBLIC_DOWNLOAD_TOKEN": {
+        "description": "Long random token for `/download/*` subscription links. Generate one with `openssl rand -base64 32`."
+      },
+      "SUB_STORE_BOOTSTRAP_SOURCE_CONTENT": {
+        "description": "Optional local node text used only for bootstrap scenarios. Leave empty for normal installs."
+      }
+    }
+  },
+  "devDependencies": {}
+}

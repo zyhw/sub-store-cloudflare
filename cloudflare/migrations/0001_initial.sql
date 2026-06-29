@@ -1,0 +1,32 @@
+CREATE TABLE IF NOT EXISTS sources (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT 'remote',
+  url TEXT NOT NULL DEFAULT '',
+  content TEXT NOT NULL DEFAULT '',
+  enabled INTEGER NOT NULL DEFAULT 1,
+  filters_json TEXT NOT NULL DEFAULT '[]',
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS collections (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  source_ids_json TEXT NOT NULL DEFAULT '[]',
+  filters_json TEXT NOT NULL DEFAULT '[]',
+  template_id TEXT NOT NULL DEFAULT 'mihomo-basic',
+  ignore_failed INTEGER NOT NULL DEFAULT 1,
+  enabled INTEGER NOT NULL DEFAULT 1,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS templates (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  target TEXT NOT NULL DEFAULT 'mihomo',
+  config_json TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);

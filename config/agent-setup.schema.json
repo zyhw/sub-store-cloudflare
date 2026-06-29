@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sub-Store Cloudflare Agent Setup",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "workerName": { "type": "string", "minLength": 1 },
+        "d1DatabaseName": { "type": "string", "minLength": 1 },
+        "adminHostname": { "type": "string" },
+        "downloadHostname": { "type": "string" },
+        "downloadTargets": {
+          "type": "array",
+          "items": { "enum": ["mihomo", "stash", "surge", "surge-mac", "surfboard", "loon", "egern", "shadowrocket", "qx", "sing-box", "v2ray", "uri", "json"] },
+          "uniqueItems": true
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/source" }
+    },
+    "collections": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/collection" }
+    },
+    "templates": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/template" }
+    }
+  },
+  "required": ["sources", "collections", "templates"],
+  "$defs": {
+    "filter": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "type": { "enum": ["include", "exclude", "rename", "delete-field", "dedupe", "sort", "regex-sort", "resolve", "flag", "quick"] },
+        "field": { "type": "string" },
+        "fields": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "pattern": { "type": "string" },
+        "patterns": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "expressions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "replacement": { "type": "string" },
+        "direction": { "enum": ["asc", "desc", "random", "original"] },
+        "action": { "enum": ["delete", "rename"] },
+        "link": { "type": "string" },
+        "position": { "enum": ["front", "back"] },
+        "template": { "type": "string" },
+        "mode": { "enum": ["add", "remove"] },
+        "tw": { "enum": ["cn", "ws", "tw"] },
+        "provider": { "enum": ["Google", "Cloudflare", "Ali", "Tencent", "Custom"] },
+        "recordType": { "enum": ["A", "AAAA"] },
+        "filter": { "enum": ["disabled", "removeFailed", "IPOnly", "IPv4Only", "IPv6Only"] },
+        "url": { "type": "string" },
+        "edns": { "type": "string" },
+        "concurrency": {
+          "oneOf": [
+            { "type": "integer", "minimum": 1, "maximum": 12 },
+            { "type": "string" }
+          ]
+        },
+        "useless": { "enum": ["DEFAULT", "ENABLED", "DISABLED"] },
+        "udp": { "enum": ["DEFAULT", "ENABLED", "DISABLED"] },
+        "scert": { "enum": ["DEFAULT", "ENABLED", "DISABLED"] },
+        "tfo": { "enum": ["DEFAULT", "ENABLED", "DISABLED"] },
+        "vmess aead": { "enum": ["DEFAULT", "ENABLED", "DISABLED"] }
+      },
+      "required": ["type"]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "enum": ["remote", "local"] },
+        "url": { "type": "string" },
+        "content": { "type": "string" },
+        "enabled": { "type": "boolean" },
+        "filterPresetIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "filters": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/filter" }
+        },
+        "meta": { "type": "object" }
+      }
+    },
+    "collection": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "sourceIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "templateId": { "type": "string" },
+        "ignoreFailed": { "type": "boolean" },
+        "enabled": { "type": "boolean" },
+        "filterPresetIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "filters": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/filter" }
+        },
+        "meta": { "type": "object" }
+      }
+    },
+    "template": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "target": { "enum": ["mihomo", "stash", "surge-mac"] },
+        "config": { "type": "object" }
+      }
+    }
+  }
+}
